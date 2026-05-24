@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My To-Do List</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: #edf2f7;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .todo-box {
+      width: 100%;
+      max-width: 460px;
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 8px;
+      color: #222;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 22px;
+    }
+
+    .input-area {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    input {
+      flex: 1;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 15px;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: #2563eb;
+    }
+
+    button {
+      border: none;
+      cursor: pointer;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .add-btn {
+      background: #2563eb;
+      color: white;
+      padding: 0 16px;
+      font-weight: bold;
+    }
+
+    .add-btn:hover {
+      background: #1d4ed8;
+    }
+
+    .task-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 12px;
+    }
+
+    ul {
+      list-style: none;
+    }
+
+    li {
+      background: #f8fafc;
+      margin-bottom: 10px;
+      padding: 12px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      border-left: 4px solid #2563eb;
+    }
+
+    .task-text {
+      flex: 1;
+      word-break: break-word;
+    }
+
+    li.completed .task-text {
+      text-decoration: line-through;
+      color: #777;
+    }
+
+    li.completed {
+      border-left-color: #16a34a;
+      background: #f0fdf4;
+    }
+
+    .task-buttons {
+      display: flex;
+      gap: 6px;
+    }
+
+    .done-btn {
+      background: #16a34a;
+      color: white;
+      padding: 7px 9px;
+    }
+
+    .delete-btn {
+      background: #dc2626;
+      color: white;
+      padding: 7px 9px;
+    }
+
+    .empty-message {
+      text-align: center;
+      color: #777;
+      margin-top: 15px;
+      font-size: 14px;
+    }
+
+    .clear-btn {
+      width: 100%;
+      margin-top: 15px;
+      padding: 11px;
+      background: #111827;
+      color: white;
+    }
+
+    .clear-btn:hover {
+      background: #000;
+    }
+
+    @media (max-width: 480px) {
+      .input-area {
+        flex-direction: column;
+      }
+
+      .add-btn {
+        padding: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="todo-box">
+    <h1>To-Do List</h1>
+    <p class="subtitle">A simple task manager for daily work</p>
+
+    <div class="input-area">
+      <input type="text" id="taskInput" placeholder="Enter a task...">
+      <button class="add-btn" onclick="addTask()">Add</button>
+    </div>
+
+    <div class="task-info">
+      <span id="totalTasks">Total: 0</span>
+      <span id="completedTasks">Completed: 0</span>
+    </div>
+
+    <ul id="taskList"></ul>
+
+    <p class="empty-message" id="emptyMessage">No tasks added yet.</p>
+
+    <button class="clear-btn" onclick="clearAllTasks()">Clear All Tasks</button>
+  </div>
+
+  <script>
+    let tasks = [];
+
+    const taskInput = document.getElementById("taskInput");
+    const taskList = document.getElementById("taskList");
+    const emptyMessage = document.getElementById("emptyMessage");
+    const totalTasks = document.getElementById("totalTasks");
+    const completedTasks = document.getElementById("completedTasks");
+
+    function addTask() {
+      const taskName = taskInput.value.trim();
+
+      if (taskName === "") {
+        alert("Please enter a task first.");
+        return;
+      }
+
+      const newTask = {
+        id: Date.now(),
+        name: taskName,
+        completed: false
+      };
+
+      tasks.push(newTask);
+      taskInput.value = "";
+      showTasks();
+    }
+
+    function showTasks() {
+      taskList.innerHTML = "";
+
+      tasks.forEach(function(task) {
+        const li = document.createElement("li");
+
+        if (task.completed) {
+          li.classList.add("completed");
+        }
+
+        li.innerHTML = `
+          <span class="task-text">${task.name}</span>
+          <div class="task-buttons">
+            <button class="done-btn" onclick="completeTask(${task.id})">Done</button>
+            <button class="delete-btn" onclick="deleteTask(${task.id})">Delete</button>
+          </div>
+        `;
+
+        taskList.appendChild(li);
+      });
+
+      updateTaskInfo();
+    }
+
+    function completeTask(id) {
+      tasks = tasks.map(function(task) {
+        if (task.id === id) {
+          task.completed = !task.completed;
+        }
+        return task;
+      });
+
+      showTasks();
+    }
+
+    function deleteTask(id) {
+      tasks = tasks.filter(function(task) {
+        return task.id !== id;
+      });
+
+      showTasks();
+    }
+
+    function clearAllTasks() {
+      if (tasks.length === 0) {
+        alert("There are no tasks to clear.");
+        return;
+      }
+
+      const confirmClear = confirm("Are you sure you want to clear all tasks?");
+
+      if (confirmClear) {
+        tasks = [];
+        showTasks();
+      }
+    }
+
+    function updateTaskInfo() {
+      const completedCount = tasks.filter(function(task) {
+        return task.completed === true;
+      }).length;
+
+      totalTasks.textContent = "Total: " + tasks.length;
+      completedTasks.textContent = "Completed: " + completedCount;
+
+      if (tasks.length === 0) {
+        emptyMessage.style.display = "block";
+      } else {
+        emptyMessage.style.display = "none";
+      }
+    }
+
+    taskInput.addEventListener("keypress", function(event) {
+      if (event.key === "Enter") {
+        addTask();
+      }
+    });
+
+    updateTaskInfo();
+  </script>
+</body>
+</html>
